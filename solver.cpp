@@ -11,7 +11,8 @@ using namespace std;
 
 string allletters = "qwertyuiopasdfghjklzxcvbnm";
 pair<int,int> solutionPaths[3][10];
-void recsolve(const pair<char,int> (&values)[5][5], unordered_map<string,bool> &k20, pair<int,int> (&pathtaken)[11], pair<string,int> (&solutions)[3], const pair<int,int> &doublepoints, int i, int j, int depth){
+unordered_map<char,int> LetterValues;
+void recsolve(const pair<char,int> (&values)[5][5], unordered_map<string,bool> &k20, pair<int,int> (&pathtaken)[11], pair<string,int> (&solutions)[3], const pair<int,int> &doublepoints, int i, int j, int depth, bool swap){
     //if depth is > 8 then we should NOT run
     if(depth > 8){return;}
     int newDepth = depth + 1;
@@ -56,7 +57,7 @@ void recsolve(const pair<char,int> (&values)[5][5], unordered_map<string,bool> &
         }
     }
     
-    else
+    else if(swap)
     {
         //can we make a swap to make a word that k20 stores?
         //its only 25*depth number of swaps and checks.
@@ -67,13 +68,15 @@ void recsolve(const pair<char,int> (&values)[5][5], unordered_map<string,bool> &
             {
                 if(tempstorecharacter == allletters[letters]){continue;}
                 word[swapinteger] = allletters[letters];
+                int tempvalue = value;
+                tempvalue -= LetterValues[tempstorecharacter] - LetterValues[allletters[letters]]; 
                 if(k20.find(word) != k20.end())
                 {
                     for(int soli = 0; soli < 3; soli++) //It does have length 10 but we only want top 3.
                     {
-                        if(solutions[soli].second < value)
+                        if(solutions[soli].second < tempvalue)
                         {
-                            solutions[soli] = make_pair(word,value);
+                            solutions[soli] = make_pair(word,tempvalue);
                             for(int w = 0; w < 11; w++)
                             {
                                 solutionPaths[soli][w] = make_pair(pathtaken[w].first,pathtaken[w].second);
@@ -90,14 +93,14 @@ void recsolve(const pair<char,int> (&values)[5][5], unordered_map<string,bool> &
     //NOW We do the recusrion depth searches
     
 
-    if((i+1 != 5) &&  j+1 != 5 &&  havebeen.find(make_pair(i+1,j+1)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i+1, j+1, newDepth);}
-    if((i+1 != 5) &&               havebeen.find(make_pair(i+1,j)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i+1, j, newDepth);}
-    if((i+1 != 5) &&  j-1 != -1 && havebeen.find(make_pair(i+1,j-1)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i+1, j-1, newDepth);}
-    if(               j+1 != 5 &&  havebeen.find(make_pair(i,j+1)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i, j+1, newDepth);}
-    if(               j-1 != -1 && havebeen.find(make_pair(i,j-1)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i, j-1, newDepth);}
-    if((i-1 != -1) && j+1 != 5 &&  havebeen.find(make_pair(i-1,j+1)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i-1, j+1, newDepth);}
-    if((i-1 != -1) &&              havebeen.find(make_pair(i-1,j)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i-1, j, newDepth);}
-    if((i-1 != -1) && j-1 != -1 && havebeen.find(make_pair(i-1,j-1)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i-1, j-1, newDepth);}
+    if((i+1 != 5) &&  j+1 != 5 &&  havebeen.find(make_pair(i+1,j+1)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i+1, j+1, newDepth,swap);}
+    if((i+1 != 5) &&               havebeen.find(make_pair(i+1,j)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i+1, j, newDepth,swap);}
+    if((i+1 != 5) &&  j-1 != -1 && havebeen.find(make_pair(i+1,j-1)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i+1, j-1, newDepth,swap);}
+    if(               j+1 != 5 &&  havebeen.find(make_pair(i,j+1)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i, j+1, newDepth,swap);}
+    if(               j-1 != -1 && havebeen.find(make_pair(i,j-1)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i, j-1, newDepth,swap);}
+    if((i-1 != -1) && j+1 != 5 &&  havebeen.find(make_pair(i-1,j+1)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i-1, j+1, newDepth,swap);}
+    if((i-1 != -1) &&              havebeen.find(make_pair(i-1,j)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i-1, j, newDepth,swap);}
+    if((i-1 != -1) && j-1 != -1 && havebeen.find(make_pair(i-1,j-1)) == havebeen.end()){recsolve(values, k20, pathtaken, solutions, doublepoints, i-1, j-1, newDepth,swap);}
     
 
     pathtaken[depth-1] = make_pair(-1,-1);
@@ -108,7 +111,6 @@ void recsolve(const pair<char,int> (&values)[5][5], unordered_map<string,bool> &
 
 int main()
 {
-    unordered_map<char,int> LetterValues;
     LetterValues['a'] = 1;
     LetterValues['e'] = 1;
     LetterValues['i'] = 1;
@@ -154,6 +156,7 @@ int main()
     //
 
     rfile.open("board.txt");
+    int swap = 0;
     pair<int,int> doublepoints = make_pair(-1,-1);
     if (rfile.is_open()) 
     {
@@ -188,6 +191,7 @@ int main()
             }
             cout << "\n";
         }
+        rfile >> swap;
         rfile.close();
     }
 
@@ -208,7 +212,7 @@ int main()
             pair<int,int> pathtaken[11];
             for(int k = 1; k < 11; k++){pathtaken[k] = make_pair(-1,-1);}
             pathtaken[0] = make_pair(i,j);
-            recsolve(values,k20,pathtaken,solutions,doublepoints,i,j,1); // true at the end is to NOT allow for recursion based off of a swap
+            recsolve(values,k20,pathtaken,solutions,doublepoints,i,j,1,swap); 
         }
     }
 
